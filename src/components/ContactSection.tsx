@@ -33,6 +33,8 @@ export default function ContactSection() {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [submittedLeadData, setSubmittedLeadData] = useState<any>(null);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(PERSONAL_INFO.email);
@@ -80,6 +82,15 @@ export default function ContactSection() {
 
       const result = await response.json();
       if (response.ok && result.success) {
+        setSubmittedLeadData({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company || 'Not Specified',
+          inquiryType: formData.inquiryType,
+          budget: formData.budget,
+          message: formData.message
+        });
+        setShowSuccessModal(true);
         triggerToast('success', 'Submitted successfully! Your message has been safely delivered.');
         setFormData({ 
           name: '', 
@@ -417,8 +428,9 @@ export default function ContactSection() {
 
       </div>
 
-      {/* Toast Notification HUD */}
+      {/* Toast & Success Modal HUD */}
       <AnimatePresence>
+        {/* Toast HUD */}
         {showToast && (
           <motion.div
             initial={{ opacity: 0, y: 50, scale: 0.95, x: 50 }}
@@ -459,6 +471,111 @@ export default function ContactSection() {
               </button>
             </div>
           </motion.div>
+        )}
+
+        {/* Success Modal Overlay */}
+        {showSuccessModal && submittedLeadData && (
+          <div className="fixed inset-0 z-[9050] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+            {/* Backdrop blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSuccessModal(false)}
+              className="fixed inset-0 bg-[#040406]/90 backdrop-blur-md"
+            />
+
+            {/* Modal Body */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative max-w-md w-full bg-[#0a0a0f] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-10 flex flex-col"
+            >
+              {/* Green gradient top accent bar */}
+              <div className="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+
+              <div className="p-6 flex flex-col items-center text-center space-y-4">
+                
+                {/* Micro Animated Check circle */}
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-md animate-ping" />
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 relative z-10">
+                    <Check className="h-7 w-7" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <p className="font-mono text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
+                    Transmission Secure / Received
+                  </p>
+                  <h3 className="font-display text-xl font-bold text-white">
+                    Message Sent Successfully!
+                  </h3>
+                  <p className="font-sans text-xs text-zinc-400 max-w-sm leading-relaxed">
+                    Thank you, <span className="text-white font-medium">{submittedLeadData.name}</span>. Your dispatch has been delivered directly using Web3Forms.
+                  </p>
+                </div>
+
+                {/* Dispatch Summary Receipt */}
+                <div className="w-full bg-white/[0.01] border border-white/5 rounded-xl p-4 space-y-2.5 text-left">
+                  <p className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 font-bold pb-1.5 border-b border-white/5">
+                    Lead Receipt Meta_Info
+                  </p>
+                  
+                  <div className="space-y-1.5 font-sans text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Sender:</span>
+                      <span className="text-zinc-200 font-medium truncate max-w-[180px]">{submittedLeadData.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Callback:</span>
+                      <span className="text-zinc-200 font-medium truncate max-w-[180px]">{submittedLeadData.email}</span>
+                    </div>
+                    {submittedLeadData.company !== 'Not Specified' && (
+                      <div className="flex justify-between">
+                        <span className="text-zinc-500">Company:</span>
+                        <span className="text-zinc-200 font-medium truncate max-w-[180px]">{submittedLeadData.company}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Inquiry:</span>
+                      <span className="text-accent-gold font-medium">{submittedLeadData.inquiryType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Budget Scope:</span>
+                      <span className="text-accent-indigo-light font-mono font-semibold">{submittedLeadData.budget}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5">
+                    <span className="font-mono text-[8px] uppercase tracking-wider text-zinc-600 block mb-1 font-bold">
+                      Message Payload
+                    </span>
+                    <p className="font-sans text-[11px] text-zinc-400 italic line-clamp-2 leading-relaxed">
+                      "{submittedLeadData.message}"
+                    </p>
+                  </div>
+                </div>
+
+                {/* Secure Trust Stamp */}
+                <div className="w-full flex items-center justify-center gap-1.5 font-mono text-[8px] text-zinc-600 uppercase font-bold tracking-widest pt-2">
+                  <Lock className="h-3 w-3 text-emerald-600 animate-pulse" />
+                  <span>direct_inbox_delivery_secured</span>
+                </div>
+
+                {/* Return CTA */}
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="w-full rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 hover:border-white/20 px-4 py-2.5 text-xs font-semibold text-white transition-all transform active:scale-95 cursor-pointer"
+                >
+                  Return to Portfolio
+                </button>
+
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </section>

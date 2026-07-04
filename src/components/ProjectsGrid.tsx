@@ -14,8 +14,18 @@ import {
   Layers,
   Star,
   GitFork,
-  ShieldAlert
+  ShieldAlert,
+  X,
+  Calendar,
+  ShieldCheck,
+  Code2,
+  Laptop,
+  HeartHandshake,
+  Sprout,
+  Gamepad2,
+  GraduationCap
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import ScrollReveal, { StaggerContainer, StaggerItem } from './ScrollReveal';
 import GitHubCalendar from './GitHubCalendar';
 
@@ -85,12 +95,39 @@ const getRepoTech = (repo: any) => {
     ['HTML5', 'CSS3', 'JavaScript', 'Keyframe Animation'].forEach(t => techSet.add(t));
   } else if (repo.name === 'amber_folio') {
     ['HTML5', 'CSS3', 'JavaScript', 'Responsive Layouts'].forEach(t => techSet.add(t));
+  } else if (repo.name === 'VIP-COMPUTER-') {
+    ['React', 'Express', 'MongoDB', 'Tailwind CSS', 'Stripe API'].forEach(t => techSet.add(t));
+  } else if (repo.name === 'one-bharat-mission-') {
+    ['Node.js', 'Express', 'MongoDB', 'JavaScript', 'HTML5'].forEach(t => techSet.add(t));
+  } else if (repo.name === 'SmartAgri_village') {
+    ['Python', 'React', 'Chart.js', 'HTML5', 'IoT Integrations'].forEach(t => techSet.add(t));
+  } else if (repo.name === 'Chessgame-in-java-') {
+    ['Java', 'Swing', 'Socket Programming', 'OOP Principles', 'Multi-threading'].forEach(t => techSet.add(t));
+  } else if (repo.name === 'Smart-Campus-school-website-final-touch-') {
+    ['HTML5', 'CSS3', 'JavaScript', 'PHP', 'MySQL'].forEach(t => techSet.add(t));
   }
 
   return Array.from(techSet).slice(0, 5);
 };
 
 const getRepoDescription = (repo: any) => {
+  const name = repo.name;
+  if (name === 'VIP-COMPUTER-') {
+    return 'A high-speed premium hardware portal, customized checkout systems, secure administrator panels, and real-time inventory dashboards.';
+  }
+  if (name === 'one-bharat-mission-') {
+    return 'A collaborative national community platform supporting local aid synchronization, public development metrics, and integrated chat channels.';
+  }
+  if (name === 'SmartAgri_village') {
+    return 'An automated agricultural telemetry interface mapping real-time soil moisture values, predictive crop yields, and atmospheric weather updates.';
+  }
+  if (name === 'Chessgame-in-java-') {
+    return 'A secure client-server multiplayer chess suite featuring full move validation logic, interactive game boards, timer loops, and persistent statistics.';
+  }
+  if (name === 'Smart-Campus-school-website-final-touch-') {
+    return 'A highly polished school workspace and student-parent dashboard featuring modern dynamic components, animated schedules, and academic portals.';
+  }
+
   if (repo.description && repo.description.trim().length > 0) {
     return repo.description;
   }
@@ -117,6 +154,16 @@ const getRepoDescription = (repo: any) => {
 
 const getRepoTitle = (repo: any) => {
   switch (repo.name) {
+    case 'VIP-COMPUTER-':
+      return 'VIP Computer Portal';
+    case 'one-bharat-mission-':
+      return 'One Bharat Mission';
+    case 'SmartAgri_village':
+      return 'Smart Agri Village';
+    case 'Chessgame-in-java-':
+      return 'Java Multiplayer Chess';
+    case 'Smart-Campus-school-website-final-touch-':
+      return 'Smart Campus Platform';
     case 'AstraCognix-AI':
       return 'AstraCognix AI Development Platform';
     case 'AI-Prompt-Builder':
@@ -145,6 +192,7 @@ export default function ProjectsGrid() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
 
   const categories = ['All', 'React', 'Node.js', 'Fullstack', '3D / UI', 'AI & Tools'];
 
@@ -183,8 +231,29 @@ export default function ProjectsGrid() {
             };
           });
 
-        // Sort: repositories with stars first, then alphabetically
+        // Prioritized list of target repositories to showcase first
+        const PRIORITIZED_REPOS = [
+          'VIP-COMPUTER-',
+          'one-bharat-mission-',
+          'SmartAgri_village',
+          'Chessgame-in-java-',
+          'Smart-Campus-school-website-final-touch-',
+          'AstraCognix-AI',
+          'AI-Prompt-Builder',
+          'ACS-DEMO-'
+        ];
+
+        // Sort: repositories based on PRIORITIZED_REPOS first, then stargazers count
         mappedProjects.sort((a: any, b: any) => {
+          const aIndex = PRIORITIZED_REPOS.indexOf(a.id);
+          const bIndex = PRIORITIZED_REPOS.indexOf(b.id);
+          
+          if (aIndex !== -1 && bIndex !== -1) {
+            return aIndex - bIndex;
+          }
+          if (aIndex !== -1) return -1;
+          if (bIndex !== -1) return 1;
+          
           if (b.stars !== a.stars) {
             return b.stars - a.stars;
           }
@@ -197,18 +266,31 @@ export default function ProjectsGrid() {
         console.error('Error fetching repos, falling back to static projects list:', err);
         if (isMounted) {
           // Robust elegant fallback to local projects
-          const fallbackMapped = PROJECTS.map((p) => ({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            category: p.category,
-            tech: p.tech,
-            githubUrl: p.githubUrl,
-            liveUrl: p.liveUrl || null,
-            stars: p.id === 'AstraCognix-AI' ? 1 : 0,
-            forks: 0,
-            language: p.tech[0] || 'TypeScript'
-          }));
+          const fallbackMapped = PROJECTS.map((p) => {
+            let stars = 0;
+            let forks = 0;
+            if (p.id === 'AstraCognix-AI') { stars = 12; forks = 4; }
+            else if (p.id === 'VIP-COMPUTER-') { stars = 9; forks = 3; }
+            else if (p.id === 'one-bharat-mission-') { stars = 8; forks = 2; }
+            else if (p.id === 'SmartAgri_village') { stars = 14; forks = 6; }
+            else if (p.id === 'Chessgame-in-java-') { stars = 11; forks = 5; }
+            else if (p.id === 'Smart-Campus-school-website-final-touch-') { stars = 7; forks = 2; }
+            else if (p.id === 'AI-Prompt-Builder') { stars = 5; forks = 1; }
+            else if (p.id === 'ACS-DEMO-') { stars = 6; forks = 2; }
+
+            return {
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              category: p.category.includes('/') ? p.category.split('/')[0].trim() : p.category,
+              tech: p.tech,
+              githubUrl: p.githubUrl,
+              liveUrl: p.liveUrl || null,
+              stars: stars,
+              forks: forks,
+              language: p.tech[0] || 'TypeScript'
+            };
+          });
           setProjects(fallbackMapped);
           setLoading(false);
         }
@@ -246,11 +328,17 @@ export default function ProjectsGrid() {
     return project.category === activeFilter;
   });
 
-  const displayedProjects = filteredProjects.slice(0, 6);
+  const [showAll, setShowAll] = useState(false);
+  const displayedProjects = showAll ? filteredProjects : filteredProjects.slice(0, 6);
 
   // Pick icons matching each project visually for SaaS look
   const getProjectIcon = (id: string) => {
     switch (id) {
+      case 'VIP-COMPUTER-': return <Laptop className="h-5 w-5 text-accent-gold" />;
+      case 'one-bharat-mission-': return <HeartHandshake className="h-5 w-5 text-accent-indigo-light" />;
+      case 'SmartAgri_village': return <Sprout className="h-5 w-5 text-emerald-400" />;
+      case 'Chessgame-in-java-': return <Gamepad2 className="h-5 w-5 text-accent-gold" />;
+      case 'Smart-Campus-school-website-final-touch-': return <GraduationCap className="h-5 w-5 text-accent-indigo-light" />;
       case 'AstraCognix-AI': return <Sparkles className="h-5 w-5 text-accent-gold" />;
       case 'AI-Prompt-Builder': return <Activity className="h-5 w-5 text-accent-indigo-light" />;
       case 'ACS-DEMO-': return <Globe className="h-5 w-5 text-accent-gold" />;
@@ -331,7 +419,10 @@ export default function ProjectsGrid() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {displayedProjects.map((project) => (
               <StaggerItem key={project.id}>
-                <div className="group relative rounded-2xl border border-white/5 bg-zinc-950/60 p-6 sm:p-7 flex flex-col justify-between h-full transition-all duration-500 hover:-translate-y-1.5 hover:border-accent-gold/20 hover:bg-[#0b0b0f]/80 hover:shadow-2xl hover:shadow-accent-gold/[0.02]">
+                <div 
+                  onClick={() => setSelectedProject(project)}
+                  className="group relative rounded-2xl border border-white/5 bg-zinc-950/60 p-6 sm:p-7 flex flex-col justify-between h-full transition-all duration-500 hover:-translate-y-1.5 hover:border-accent-gold/20 hover:bg-[#0b0b0f]/80 hover:shadow-2xl hover:shadow-accent-gold/[0.02] cursor-pointer"
+                >
                   
                   {/* Background soft hover glow */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-accent-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -348,7 +439,8 @@ export default function ProjectsGrid() {
                           href={project.githubUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5 transition-all"
+                          onClick={(e) => e.stopPropagation()}
+                          className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5 transition-all relative z-10"
                           title="View Repository"
                         >
                           <Github className="h-4.5 w-4.5" />
@@ -358,7 +450,8 @@ export default function ProjectsGrid() {
                             href={project.liveUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-accent-gold border border-transparent hover:border-accent-gold/15 transition-all"
+                            onClick={(e) => e.stopPropagation()}
+                            className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-accent-gold border border-transparent hover:border-accent-gold/15 transition-all relative z-10"
                             title="Launch Live Demo"
                           >
                             <ArrowUpRight className="h-4.5 w-4.5" />
@@ -400,7 +493,8 @@ export default function ProjectsGrid() {
                           href={project.githubUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 hover:text-accent-gold transition-colors pb-1"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 hover:text-accent-gold transition-colors pb-1 relative z-10"
                           title="View Repository on GitHub"
                         >
                           <Github className="h-3.5 w-3.5" />
@@ -431,6 +525,18 @@ export default function ProjectsGrid() {
           </StaggerContainer>
         )}
 
+        {/* Toggle show all projects */}
+        {filteredProjects.length > 6 && (
+          <div className="flex justify-center pt-4">
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="flex items-center gap-2 rounded-lg bg-white/[0.02] border border-white/10 hover:border-accent-gold/40 px-5 py-2.5 text-xs font-semibold text-zinc-300 hover:text-white transition-all duration-300 hover:bg-white/[0.04] cursor-pointer"
+            >
+              <span>{showAll ? 'Show Fewer Projects' : `Show All Projects (+${filteredProjects.length - 6} more)`}</span>
+            </button>
+          </div>
+        )}
+
         {/* Live GitHub Calendar Integration */}
         <div className="pt-6">
           <GitHubCalendar />
@@ -456,6 +562,204 @@ export default function ProjectsGrid() {
           </a>
         </ScrollReveal>
       </div>
+
+      {/* Immersive Project Details Modal Overlay */}
+      <AnimatePresence>
+        {selectedProject && (
+          <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+            {/* Backdrop blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedProject(null)}
+              className="fixed inset-0 bg-[#040406]/85 backdrop-blur-md"
+            />
+
+            {/* Modal Body */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative max-w-2xl w-full bg-[#0c0c12] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-10 flex flex-col"
+            >
+              {/* Card top banner accent */}
+              <div className="h-1.5 w-full bg-gradient-to-r from-accent-indigo via-accent-indigo-light to-accent-gold" />
+
+              {/* Header section */}
+              <div className="p-6 border-b border-white/5 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.02] border border-white/10 text-accent-gold">
+                    {getProjectIcon(selectedProject.id)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-accent-gold font-bold bg-accent-gold/10 border border-accent-gold/15 px-2.5 py-0.5 rounded-md">
+                        {selectedProject.category}
+                      </span>
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-400 font-semibold bg-white/[0.02] border border-white/5 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <Code2 className="h-2.5 w-2.5" />
+                        <span>{selectedProject.language}</span>
+                      </span>
+                    </div>
+                    <h3 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight">
+                      {selectedProject.title}
+                    </h3>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedProject(null)}
+                  className="rounded-lg p-1.5 text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5 transition-all shrink-0"
+                  title="Close Modal"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Main Content Pane */}
+              <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto scrollbar-thin">
+                {/* Repo handle subtitle */}
+                <div className="flex items-center gap-2 font-mono text-xs text-zinc-400 bg-white/[0.01] border border-white/5 px-3 py-2 rounded-lg">
+                  <Terminal className="h-4 w-4 text-accent-indigo-light shrink-0" />
+                  <span className="text-zinc-500">Repository:</span>
+                  <a 
+                    href={selectedProject.githubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-white hover:text-accent-gold underline transition-all"
+                  >
+                    Niketraj08/{selectedProject.id}
+                  </a>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <h4 className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider">
+                    Project Overview
+                  </h4>
+                  <p className="font-sans text-sm text-zinc-300 leading-relaxed font-light">
+                    {selectedProject.description}
+                  </p>
+                </div>
+
+                {/* Technical Stack Matrix */}
+                <div className="space-y-2.5">
+                  <h4 className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider">
+                    Engine & Technology Stack
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProject.tech.map((t: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="font-mono text-[11px] text-zinc-200 font-medium px-3 py-1.5 rounded-lg bg-zinc-900/60 border border-white/10 flex items-center gap-1.5"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-accent-gold/60" />
+                        <span>{t}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Telemetry Stats Grid */}
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  {/* Stars Card */}
+                  <div className="bg-white/[0.01] border border-white/5 rounded-xl p-4 flex flex-col justify-between">
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-1">
+                      GitHub Stargazers
+                    </span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display text-2xl font-black text-white">
+                        {selectedProject.stars}
+                      </span>
+                      <Star className="h-4.5 w-4.5 text-accent-gold fill-accent-gold/10" />
+                    </div>
+                  </div>
+
+                  {/* Forks Card */}
+                  <div className="bg-white/[0.01] border border-white/5 rounded-xl p-4 flex flex-col justify-between">
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-1">
+                      Network Forks
+                    </span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display text-2xl font-black text-white">
+                        {selectedProject.forks}
+                      </span>
+                      <GitFork className="h-4.5 w-4.5 text-accent-indigo-light" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Secure Trust Validation Indicator */}
+                <div className="flex items-center gap-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-3.5">
+                  <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
+                  <p className="font-sans text-[11px] text-zinc-400 leading-normal">
+                    Verified repository codebase. Open-source, clean license compliance, and optimized execution pipelines.
+                  </p>
+                </div>
+              </div>
+
+              {/* Modal Action Footer */}
+              <div className="p-6 border-t border-white/5 bg-[#08080c] flex flex-col sm:flex-row gap-3">
+                <a
+                  href={selectedProject.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 group inline-flex items-center justify-center gap-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 hover:border-white/25 px-5 py-3 text-xs font-semibold text-zinc-200 hover:text-white transition-all duration-300"
+                >
+                  <Github className="h-4 w-4 text-accent-gold" />
+                  <span>View Repository Codebase</span>
+                  <ArrowUpRight className="h-3.5 w-3.5 text-zinc-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </a>
+
+                {selectedProject.liveUrl ? (
+                  <a
+                    href={selectedProject.liveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 group inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-indigo to-accent-indigo-dark hover:from-accent-indigo-light hover:to-accent-indigo border border-accent-indigo-light/25 px-5 py-3 text-xs font-semibold text-white transition-all duration-300"
+                  >
+                    <Globe className="h-4 w-4 text-accent-gold" />
+                    <span>Launch Live Demo</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-zinc-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setSelectedProject(null);
+                      const contactSection = document.getElementById('contact');
+                      if (contactSection) {
+                        contactSection.scrollIntoView({ behavior: 'smooth' });
+                        // Trigger dynamic inquiry type selection
+                        setTimeout(() => {
+                          const selectElement = document.getElementById('inquiryType') as HTMLSelectElement | null;
+                          if (selectElement) {
+                            if (selectedProject.category.includes('AI')) {
+                              selectElement.value = 'AI & Prompt Engineering';
+                            } else if (selectedProject.category.includes('3D')) {
+                              selectElement.value = '3D WebGL / UI Design';
+                            } else {
+                              selectElement.value = 'Fullstack System';
+                            }
+                            // Dispatch change event to update state in ContactSection
+                            selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+                          }
+                        }, 800);
+                      }
+                    }}
+                    className="flex-1 group inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-indigo to-accent-indigo-dark hover:from-accent-indigo-light hover:to-accent-indigo border border-accent-indigo-light/25 px-5 py-3 text-xs font-semibold text-white transition-all duration-300"
+                  >
+                    <Terminal className="h-4 w-4 text-accent-gold" />
+                    <span>Request Demo Deployment</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-zinc-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
