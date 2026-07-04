@@ -1,0 +1,6 @@
+{
+  "name": "Niket Raj Portfolio",
+  "description": "Premium personal portfolio for Niket Raj, a Computer Science student, styled as an elegant, glassmorphic SaaS admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
