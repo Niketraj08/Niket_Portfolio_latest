@@ -12,7 +12,7 @@ export const PERSONAL_INFO = {
   batch: '2022 – 2026',
   bio: 'Final-year Computer Science student passionate about system design, web technology, and developer tooling. Experienced in building full-stack applications with high-fidelity frontend layouts and cloud-native integrations. Always optimizing for sub-second load times and intuitive user paths.',
   location: 'Bhubaneswar, India',
-  resume: 'https://github.com/Niketraj08/AstraCognix-AI/blob/main/public/resume.pdf',
+  resume: 'https://drive.google.com/file/d/1fYV3k1Bjla3x9NB3g3c1cn58LbjuCilN/view?usp=sharing',
 };
 
 export const STATS: StatItem[] = [
@@ -211,6 +211,19 @@ export const PROJECTS: Project[] = [
 ];
 
 export const EDUCATION: EducationMilestone[] = [
+  {
+    id: 'class12',
+    period: '2020 – 2022',
+    title: 'Senior Secondary (Class XII)',
+    institution: 'Kendriya Vidyalaya Sonpur',
+    description: 'Completed higher secondary education in the Science stream with a focus on Physics, Chemistry, and Mathematics (PCM). Cultivated early analytical, problem-solving, and computational skills.',
+    badge: 'Score: 80%',
+    achievements: [
+      'Graduated with Science Stream (Physics, Chemistry, Mathematics)',
+      'Scored 80% aggregate in CBSE board examinations',
+      'Actively participated in school computational and science challenges',
+    ],
+  },
   {
     id: 'year1',
     period: '2022 – 2023',

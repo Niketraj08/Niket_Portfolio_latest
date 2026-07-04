@@ -4,9 +4,9 @@ import { GraduationCap, Trophy, BookmarkCheck, Milestone, Calendar, ChevronRight
 import ScrollReveal, { StaggerContainer, StaggerItem } from './ScrollReveal';
 
 export default function EducationSection() {
-  const [selectedMilestone, setSelectedMilestone] = useState(EDUCATION[3].id);
+  const [selectedMilestone, setSelectedMilestone] = useState(EDUCATION[EDUCATION.length - 1].id);
 
-  const activeData = EDUCATION.find(m => m.id === selectedMilestone) || EDUCATION[3];
+  const activeData = EDUCATION.find(m => m.id === selectedMilestone) || EDUCATION[EDUCATION.length - 1];
 
   return (
     <section id="education" className="py-20 border-t border-white/5 relative">

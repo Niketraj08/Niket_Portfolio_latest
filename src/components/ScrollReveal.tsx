@@ -32,10 +32,12 @@ export default function ScrollReveal({
 export function StaggerContainer({
   children,
   delay = 0,
+  staggerDelay = 0.08,
   className = '',
 }: {
   children: ReactNode;
   delay?: number;
+  staggerDelay?: number;
   className?: string;
   key?: any;
 }) {
@@ -49,7 +51,7 @@ export function StaggerContainer({
         hidden: {},
         show: {
           transition: {
-            staggerChildren: 0.08,
+            staggerChildren: staggerDelay,
             delayChildren: delay,
           },
         },

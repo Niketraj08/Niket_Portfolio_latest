@@ -381,6 +381,9 @@ export default function ProjectsGrid() {
         <ScrollReveal>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div className="space-y-2">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-white tracking-tight">
+                Work
+              </h2>
               <p className="font-sans text-sm text-zinc-500 max-w-xl">
                 A selection of high-fidelity SaaS platforms, infrastructure telemetry suites, and AI engines built during my academic journey.
               </p>
@@ -437,7 +440,11 @@ export default function ProjectsGrid() {
           </div>
         ) : (
           /* Projects Grid */
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <StaggerContainer 
+            key={`${activeFilter}-${showAll}`}
+            staggerDelay={showAll ? 0.015 : 0.08}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
             {displayedProjects.map((project) => (
               <StaggerItem key={project.id}>
                 <div 
