@@ -29,19 +29,42 @@ export default function ContactSection() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
     setIsSending(true);
+    setSentStatus(null);
     
-    // Simulate high-speed SaaS secure webhook transmission
-    setTimeout(() => {
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: '52946004-e376-4674-9a70-0dfd99b90329',
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          subject: `New Client Reachout - Portfolio Message from ${formData.name}`
+        })
+      });
+
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setSentStatus('success');
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        throw new Error(result.message || 'Transmission failed');
+      }
+    } catch (error) {
+      console.error('Error sending message via web2form:', error);
+      setSentStatus('error');
+    } finally {
       setIsSending(false);
-      setSentStatus('success');
-      setFormData({ name: '', email: '', message: '' });
-      setTimeout(() => setSentStatus(null), 5000);
-    }, 1200);
+    }
   };
 
   return (
@@ -270,9 +293,18 @@ export default function ContactSection() {
                   {/* Dynamic Alert Feed */}
                   {sentStatus === 'success' && (
                     <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/15 p-3.5">
-                      <p className="font-mono text-[10px] text-emerald-400 font-bold uppercase mb-1">Response: 202 ACCEPTED</p>
-                      <p className="font-sans text-[11px] text-zinc-400">
-                        Thank you, Alexis. Your dispatch request was processed successfully. I'll get back to you immediately on your callback address.
+                      <p className="font-mono text-[10px] text-emerald-400 font-bold uppercase mb-1">Response: 200 OK / SUBMITTED SUCCESSFULLY</p>
+                      <p className="font-sans text-[11px] text-zinc-300">
+                        Submitted successfully! Your message has been safely delivered directly to Niketraj's inbox using web2form.
+                      </p>
+                    </div>
+                  )}
+
+                  {sentStatus === 'error' && (
+                    <div className="rounded-lg bg-red-500/5 border border-red-500/15 p-3.5">
+                      <p className="font-mono text-[10px] text-red-400 font-bold uppercase mb-1">Response: 500 TRANSMISSION ERROR</p>
+                      <p className="font-sans text-[11px] text-zinc-300">
+                        Failed to submit message. Please check your connection and try again, or mail directly to {PERSONAL_INFO.email}.
                       </p>
                     </div>
                   )}
