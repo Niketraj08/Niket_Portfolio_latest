@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PERSONAL_INFO } from '../data';
-import { ArrowUpRight, Copy, Check, Terminal, Play, Server, Database } from 'lucide-react';
+import { ArrowUpRight, Copy, Check, Terminal, Play, Server, Database, FileDown } from 'lucide-react';
 import { motion } from 'motion/react';
 import ScrollReveal from './ScrollReveal';
 
@@ -58,6 +58,16 @@ export default function HeroSection() {
               Secure Connection
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
+
+            <a
+              href={PERSONAL_INFO.resume}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex items-center gap-2 rounded-lg bg-white/[0.04] border border-white/10 hover:border-accent-gold/40 px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/[0.08]"
+            >
+              <FileDown className="h-4 w-4 text-accent-gold" />
+              <span>Resume</span>
+            </a>
 
             <button
               onClick={handleCopyEmail}

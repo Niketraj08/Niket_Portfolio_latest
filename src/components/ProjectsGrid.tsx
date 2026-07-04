@@ -15,7 +15,8 @@ import {
   Globe, 
   Activity, 
   Terminal, 
-  Layout 
+  Layout,
+  Layers 
 } from 'lucide-react';
 import ScrollReveal, { StaggerContainer, StaggerItem } from './ScrollReveal';
 import GitHubCalendar from './GitHubCalendar';
@@ -23,27 +24,42 @@ import GitHubCalendar from './GitHubCalendar';
 export default function ProjectsGrid() {
   const [activeFilter, setActiveFilter] = useState('All');
 
-  const categories = ['All', 'Full-Stack / Systems', 'Full-Stack / DevOps', 'Cloud Native / Systems'];
+  const categories = ['All', 'React', 'Node.js', 'Fullstack', '3D / UI', 'AI & Tools'];
 
-  const filteredProjects = activeFilter === 'All'
-    ? PROJECTS
-    : PROJECTS.filter(p => p.category === activeFilter);
+  const filteredProjects = PROJECTS.filter((project) => {
+    if (activeFilter === 'All') return true;
+    const lowerFilter = activeFilter.toLowerCase();
+    
+    if (lowerFilter === 'react') {
+      return project.tech.some(t => t.toLowerCase().includes('react') || t.toLowerCase().includes('next.js'));
+    }
+    if (lowerFilter === 'node.js') {
+      return project.tech.some(t => t.toLowerCase().includes('node') || t.toLowerCase().includes('express'));
+    }
+    if (lowerFilter === 'fullstack') {
+      return project.category.toLowerCase().includes('full-stack') || project.category.toLowerCase().includes('fullstack');
+    }
+    if (lowerFilter === '3d / ui') {
+      return project.category === '3D / UI';
+    }
+    if (lowerFilter === 'ai & tools') {
+      return project.tech.some(t => t.toLowerCase().includes('api') || t.toLowerCase().includes('gemini')) || 
+             project.id.toLowerCase().includes('prompt') || 
+             project.id.toLowerCase().includes('ai');
+    }
+    return project.category === activeFilter;
+  });
 
   // Pick icons matching each project visually for SaaS look
   const getProjectIcon = (id: string) => {
     switch (id) {
-      case 'saas-dashboard': return <Database className="h-5 w-5 text-accent-gold" />;
-      case 'mern-chat-app': return <Sparkles className="h-5 w-5 text-accent-indigo-light" />;
-      case 'nextjs-ecommerce': return <Layout className="h-5 w-5 text-accent-gold" />;
-      case 'secure-auth-api': return <Lock className="h-5 w-5 text-accent-indigo-light" />;
-      case 'gandhi-college-portal': return <GraduationCap className="h-5 w-5 text-accent-gold" />;
-      case 'algorithm-visualizer-cpp': return <Code2 className="h-5 w-5 text-accent-indigo-light" />;
-      case 'aws-devops-pipeline': return <Globe className="h-5 w-5 text-accent-gold" />;
-      case 'hotel-booking-mern': return <Layout className="h-5 w-5 text-accent-indigo-light" />;
-      case 'devops-monitoring-agent': return <Activity className="h-5 w-5 text-accent-gold" />;
-      case 'nextjs-portfolio': return <Terminal className="h-5 w-5 text-accent-indigo-light" />;
-      case 'cpp-keyvalue-store': return <Cpu className="h-5 w-5 text-accent-gold" />;
-      case 'realtime-collaborative-board': return <Sparkles className="h-5 w-5 text-accent-indigo-light" />;
+      case 'AstraCognix-AI': return <Sparkles className="h-5 w-5 text-accent-gold" />;
+      case 'AI-Prompt-Builder': return <Activity className="h-5 w-5 text-accent-indigo-light" />;
+      case 'ACS-DEMO-': return <Globe className="h-5 w-5 text-accent-gold" />;
+      case '3js-pratical': return <Cpu className="h-5 w-5 text-accent-indigo-light" />;
+      case '3D-Coverflow': return <Layout className="h-5 w-5 text-accent-gold" />;
+      case '3D-Animation-': return <Layers className="h-5 w-5 text-accent-indigo-light" />;
+      case 'amber_folio': return <Terminal className="h-5 w-5 text-accent-gold" />;
       default: return <FolderGit2 className="h-5 w-5 text-accent-indigo-light" />;
     }
   };
@@ -58,13 +74,6 @@ export default function ProjectsGrid() {
         <ScrollReveal>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent-gold" />
-                <span className="font-mono text-xs uppercase tracking-widest text-accent-gold font-bold">Projects_Module_03</span>
-              </div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-white tracking-tight">
-                Production-Grade Solutions
-              </h2>
               <p className="font-sans text-sm text-zinc-500 max-w-xl">
                 A selection of high-fidelity SaaS platforms, infrastructure telemetry suites, and AI engines built during my academic journey.
               </p>
@@ -145,9 +154,21 @@ export default function ProjectsGrid() {
                         </>
                       )}
                     </div>
-                    <h3 className="font-display text-xl font-bold text-white group-hover:text-accent-gold transition-colors duration-500">
-                      {project.title}
-                    </h3>
+                    <div className="space-y-1">
+                      <h3 className="font-display text-xl font-bold text-white group-hover:text-accent-gold transition-colors duration-500">
+                        {project.title}
+                      </h3>
+                      <a 
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 hover:text-accent-gold transition-colors pb-1"
+                        title="View Repository on GitHub"
+                      >
+                        <Github className="h-3.5 w-3.5" />
+                        <span>Niketraj08/{project.id}</span>
+                      </a>
+                    </div>
                     <p className="font-sans text-sm text-zinc-400 leading-relaxed font-light">
                       {project.description}
                     </p>
