@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Set up active section tracking with IntersectionObserver
   useEffect(() => {
-    const sections = ['hero', 'about', 'skills', 'projects', 'education', 'contact'];
+    const sections = ['hero', 'about', 'leetcode-lab', 'skills', 'projects', 'education', 'contact'];
     
     const observerOptions = {
       root: null,

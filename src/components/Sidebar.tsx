@@ -9,7 +9,8 @@ import {
   Mail, 
   Menu, 
   X,
-  Clock
+  Clock,
+  Code2
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -34,6 +35,7 @@ export default function Sidebar({ activeSection }: SidebarProps) {
   const menuItems = [
     { id: 'hero', label: 'Terminal / Home', icon: Terminal },
     { id: 'about', label: 'About Student', icon: User },
+    { id: 'leetcode-lab', label: 'LeetCode Activity', icon: Code2 },
     { id: 'skills', label: 'Tech Skills', icon: Cpu },
     { id: 'projects', label: 'SaaS Projects', icon: FolderGit2 },
     { id: 'education', label: 'Education Path', icon: GraduationCap },

@@ -8,7 +8,7 @@ import { AnimatePresence } from 'motion/react';
 import DashboardLayout from './components/DashboardLayout';
 import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
-import TechMarquee from './components/TechMarquee';
+import LeetCodeSection from './components/LeetCodeSection';
 import SkillsSection from './components/SkillsSection';
 import ProjectsGrid from './components/ProjectsGrid';
 import EducationSection from './components/EducationSection';
@@ -33,8 +33,8 @@ export default function App() {
         {/* 02. Academic Bento Bio & Stats Counters */}
         <AboutSection />
 
-        {/* 03. Infinite Rolling Tech Ticker */}
-        <TechMarquee />
+        {/* 03. LeetCode Coding Activity Dashboard */}
+        <LeetCodeSection />
 
         {/* 04. 3D-Tilt Core Competency Cards */}
         <SkillsSection />

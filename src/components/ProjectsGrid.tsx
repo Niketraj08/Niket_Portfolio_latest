@@ -200,17 +200,32 @@ export default function ProjectsGrid() {
     let isMounted = true;
     async function fetchRepos() {
       try {
-        const response = await fetch('https://api.github.com/users/Niketraj08/repos?sort=updated&per_page=100');
-        if (!response.ok) {
-          throw new Error('Failed to fetch repositories from GitHub');
-        }
-        const data = await response.json();
+        let allRepos: any[] = [];
+        let page = 1;
+        let hasMore = true;
         
+        while (hasMore && page <= 4) {
+          const response = await fetch(`https://api.github.com/users/Niketraj08/repos?sort=updated&per_page=100&page=${page}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch repositories from GitHub');
+          }
+          const data = await response.json();
+          if (!data || data.length === 0) {
+            hasMore = false;
+          } else {
+            allRepos = [...allRepos, ...data];
+            if (data.length < 100) {
+              hasMore = false;
+            } else {
+              page++;
+            }
+          }
+        }
+
         if (!isMounted) return;
 
         // Map GitHub repositories to standard project object structure
-        const mappedProjects = data
-          .filter((repo: any) => !repo.fork) // Keep only original repositories
+        const mappedProjects = allRepos
           .map((repo: any) => {
             const category = getRepoCategory(repo);
             const tech = getRepoTech(repo);
@@ -227,7 +242,8 @@ export default function ProjectsGrid() {
               liveUrl: repo.homepage || null,
               stars: repo.stargazers_count,
               forks: repo.forks_count,
-              language: repo.language || 'Unknown'
+              language: repo.language || 'Unknown',
+              isFork: repo.fork
             };
           });
 
@@ -253,6 +269,11 @@ export default function ProjectsGrid() {
           }
           if (aIndex !== -1) return -1;
           if (bIndex !== -1) return 1;
+          
+          // Put non-forks before forks to showcase self-created repositories first
+          if (a.isFork !== b.isFork) {
+            return a.isFork ? 1 : -1;
+          }
           
           if (b.stars !== a.stars) {
             return b.stars - a.stars;
