@@ -34,7 +34,7 @@ export default function Sidebar({ activeSection }: SidebarProps) {
 
   const menuItems = [
     { id: 'hero', label: 'Terminal / Home', icon: Terminal },
-    { id: 'about', label: 'About Student', icon: User },
+    { id: 'about', label: 'About', icon: User },
     { id: 'leetcode-lab', label: 'LeetCode Activity', icon: Code2 },
     { id: 'skills', label: 'Tech Skills', icon: Cpu },
     { id: 'projects', label: 'SaaS Projects', icon: FolderGit2 },
