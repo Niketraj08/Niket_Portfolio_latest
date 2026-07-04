@@ -9,15 +9,30 @@ import {
   Copy, 
   Lock, 
   HelpCircle, 
-  ArrowUpRight 
+  ArrowUpRight,
+  X,
+  Building,
+  Briefcase,
+  DollarSign,
+  AlertCircle
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import ScrollReveal from './ScrollReveal';
 
 export default function ContactSection() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    email: '', 
+    company: '',
+    inquiryType: 'Fullstack System',
+    budget: 'N/A',
+    message: '' 
+  });
   const [isSending, setIsSending] = useState(false);
   const [sentStatus, setSentStatus] = useState<null | 'success' | 'error'>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(PERSONAL_INFO.email);
@@ -25,8 +40,17 @@ export default function ContactSection() {
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const triggerToast = (status: 'success' | 'error', msg: string) => {
+    setSentStatus(status);
+    setToastMessage(msg);
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 6000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +58,6 @@ export default function ContactSection() {
     if (!formData.name || !formData.email || !formData.message) return;
 
     setIsSending(true);
-    setSentStatus(null);
     
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
@@ -47,21 +70,31 @@ export default function ContactSection() {
           access_key: '52946004-e376-4674-9a70-0dfd99b90329',
           name: formData.name,
           email: formData.email,
+          company: formData.company || 'Not Specified',
+          inquiry_type: formData.inquiryType,
+          budget_scope: formData.budget,
           message: formData.message,
-          subject: `New Client Reachout - Portfolio Message from ${formData.name}`
+          subject: `⚡ Portfolio Lead: ${formData.inquiryType} from ${formData.name}`
         })
       });
 
       const result = await response.json();
       if (response.ok && result.success) {
-        setSentStatus('success');
-        setFormData({ name: '', email: '', message: '' });
+        triggerToast('success', 'Submitted successfully! Your message has been safely delivered.');
+        setFormData({ 
+          name: '', 
+          email: '', 
+          company: '', 
+          inquiryType: 'Fullstack System', 
+          budget: 'N/A', 
+          message: '' 
+        });
       } else {
         throw new Error(result.message || 'Transmission failed');
       }
     } catch (error) {
-      console.error('Error sending message via web2form:', error);
-      setSentStatus('error');
+      console.error('Error sending message via web3form:', error);
+      triggerToast('error', 'Failed to submit message. Please check your connection and try again.');
     } finally {
       setIsSending(false);
     }
@@ -209,38 +242,103 @@ export default function ContactSection() {
                     <HelpCircle className="h-4.5 w-4.5 text-zinc-600" />
                   </div>
 
-                  {/* Name field */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="name" className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider block">
-                      Client Sender Name
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Alexis Vance"
-                      className="w-full rounded-lg bg-zinc-900/50 border border-white/10 hover:border-zinc-700 focus:border-accent-gold focus:outline-none focus:ring-1 focus:ring-accent-gold/40 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 transition-all font-sans"
-                    />
+                  {/* Name & Email Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Name field */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="name" className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider block">
+                        Client Sender Name
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        name="name"
+                        required
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Alexis Vance"
+                        className="w-full rounded-lg bg-zinc-900/50 border border-white/10 hover:border-zinc-700 focus:border-accent-gold focus:outline-none focus:ring-1 focus:ring-accent-gold/40 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 transition-all font-sans"
+                      />
+                    </div>
+
+                    {/* Email field */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="email" className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider block">
+                        Sender Callback Email
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="e.g. alexis@corporation.com"
+                        className="w-full rounded-lg bg-zinc-900/50 border border-white/10 hover:border-zinc-700 focus:border-accent-gold focus:outline-none focus:ring-1 focus:ring-accent-gold/40 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 transition-all font-sans"
+                      />
+                    </div>
                   </div>
 
-                  {/* Email field */}
+                  {/* Company & Inquiry Type Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Company field */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="company" className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider block flex items-center gap-1">
+                        <Building className="h-3 w-3 text-zinc-600 animate-pulse" />
+                        <span>Company / Org <span className="text-zinc-600 font-normal">(Optional)</span></span>
+                      </label>
+                      <input
+                        id="company"
+                        type="text"
+                        name="company"
+                        value={formData.company}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Black Mesa Inc."
+                        className="w-full rounded-lg bg-zinc-900/50 border border-white/10 hover:border-zinc-700 focus:border-accent-gold focus:outline-none focus:ring-1 focus:ring-accent-gold/40 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 transition-all font-sans"
+                      />
+                    </div>
+
+                    {/* Inquiry Type field */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="inquiryType" className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider block flex items-center gap-1">
+                        <Briefcase className="h-3 w-3 text-zinc-600" />
+                        <span>Inquiry Type</span>
+                      </label>
+                      <select
+                        id="inquiryType"
+                        name="inquiryType"
+                        value={formData.inquiryType}
+                        onChange={handleInputChange}
+                        className="w-full rounded-lg bg-zinc-900/50 border border-white/10 hover:border-zinc-700 focus:border-accent-gold focus:outline-none focus:ring-1 focus:ring-accent-gold/40 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 transition-all font-sans cursor-pointer"
+                      >
+                        <option value="Fullstack System" className="bg-zinc-950 text-white">Fullstack System</option>
+                        <option value="AI & Prompt Engineering" className="bg-zinc-950 text-white">AI & Prompt Engineering</option>
+                        <option value="3D WebGL / UI Design" className="bg-zinc-950 text-white">3D WebGL / UI Design</option>
+                        <option value="Internship / Research" className="bg-zinc-950 text-white">Internship / Research</option>
+                        <option value="General Collaboration" className="bg-zinc-950 text-white">General Collaboration</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Estimated Budget / Scope Field */}
                   <div className="space-y-1.5">
-                    <label htmlFor="email" className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider block">
-                      Sender Callback Email
+                    <label htmlFor="budget" className="font-mono text-[10px] uppercase text-zinc-500 font-bold tracking-wider block flex items-center gap-1">
+                      <DollarSign className="h-3 w-3 text-zinc-600" />
+                      <span>Estimated Budget / Scope</span>
                     </label>
-                    <input
-                      id="email"
-                      type="email"
-                      name="email"
-                      required
-                      value={formData.email}
+                    <select
+                      id="budget"
+                      name="budget"
+                      value={formData.budget}
                       onChange={handleInputChange}
-                      placeholder="e.g. alexis@corporation.com"
-                      className="w-full rounded-lg bg-zinc-900/50 border border-white/10 hover:border-zinc-700 focus:border-accent-gold focus:outline-none focus:ring-1 focus:ring-accent-gold/40 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 transition-all font-sans"
-                    />
+                      className="w-full rounded-lg bg-zinc-900/50 border border-white/10 hover:border-zinc-700 focus:border-accent-gold focus:outline-none focus:ring-1 focus:ring-accent-gold/40 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 transition-all font-sans cursor-pointer"
+                    >
+                      <option value="N/A" className="bg-zinc-950 text-white">N/A / Just Saying Hi or Internship Inquiry</option>
+                      <option value="Under $1,000" className="bg-zinc-950 text-white">Under $1,000 (Small Prototype / Fix)</option>
+                      <option value="1,000 - $3,000" className="bg-zinc-950 text-white">$1,000 - $3,000 (Standard MVP / Full Portal)</option>
+                      <option value="3,000 - $10,000" className="bg-zinc-950 text-white">$3,000 - $10,000 (Complex Fullstack System or Custom AI)</option>
+                      <option value="$10,000+" className="bg-zinc-950 text-white">$10,000+ (Enterprise Platform Integration)</option>
+                    </select>
                   </div>
 
                   {/* Message field */}
@@ -318,6 +416,51 @@ export default function ContactSection() {
         </div>
 
       </div>
+
+      {/* Toast Notification HUD */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95, x: 50 }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.2 } }}
+            className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-[#0b0b0f]/95 border border-white/10 hover:border-accent-gold/20 shadow-2xl shadow-accent-gold/[0.04] rounded-xl p-4.5 backdrop-blur-xl"
+          >
+            <div className="flex items-start gap-3.5">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                sentStatus === 'success' 
+                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
+                  : 'bg-red-500/10 border border-red-500/20 text-red-400'
+              }`}>
+                {sentStatus === 'success' ? (
+                  <Check className="h-5 w-5" />
+                ) : (
+                  <AlertCircle className="h-5 w-5" />
+                )}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 font-bold mb-0.5">
+                  {sentStatus === 'success' ? 'SYSTEM_ALERT: 200 OK' : 'SYSTEM_ALERT: 500 ERROR'}
+                </p>
+                <p className="font-display text-sm font-bold text-white mb-1">
+                  {sentStatus === 'success' ? 'Transmission Successful' : 'Transmission Failed'}
+                </p>
+                <p className="font-sans text-xs text-zinc-400 leading-relaxed">
+                  {toastMessage}
+                </p>
+              </div>
+
+              <button 
+                onClick={() => setShowToast(false)}
+                className="rounded-md p-1 text-zinc-500 hover:bg-white/5 hover:text-white transition-all shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
