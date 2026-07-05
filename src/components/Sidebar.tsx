@@ -55,8 +55,8 @@ export default function Sidebar({ activeSection }: SidebarProps) {
       {/* Mobile Header */}
       <header className="fixed top-0 left-0 right-0 z-40 flex h-16 items-center justify-between border-b border-white/5 bg-bg-dark/80 px-6 backdrop-blur-md lg:hidden">
         {/* Animated Logo */}
-        <div className="flex items-center gap-3">
-          <svg className="h-8 w-8 text-accent-gold" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div className="flex items-center gap-3 group cursor-pointer">
+          <svg className="h-8 w-8 text-accent-gold transition-transform duration-700 ease-in-out group-hover:rotate-[360deg]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#DFBA73" />
@@ -96,7 +96,7 @@ export default function Sidebar({ activeSection }: SidebarProps) {
           <div className="hidden lg:flex items-center gap-3 py-2 border-b border-white/5 pb-6">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.02] border border-white/10 overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-tr from-accent-indigo/10 to-accent-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <svg className="h-7 w-7 text-accent-gold" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="h-7 w-7 text-accent-gold transition-transform duration-700 ease-in-out group-hover:rotate-[360deg]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="logo-grad-desktop" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#DFBA73" />
