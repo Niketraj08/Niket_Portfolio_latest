@@ -17,6 +17,7 @@ import WelcomePreloader from './components/WelcomePreloader';
 
 export default function App() {
   const [showPreloader, setShowPreloader] = useState(true);
+  const [activeHighlight, setActiveHighlight] = useState<{ type: 'category' | 'skill'; value: string } | null>(null);
 
   return (
     <>
@@ -37,10 +38,16 @@ export default function App() {
         <LeetCodeSection />
 
         {/* 04. 3D-Tilt Core Competency Cards */}
-        <SkillsSection />
+        <SkillsSection 
+          activeHighlight={activeHighlight} 
+          onHighlightChange={setActiveHighlight} 
+        />
 
         {/* 05. Production SaaS Project Grid */}
-        <ProjectsGrid />
+        <ProjectsGrid 
+          activeHighlight={activeHighlight} 
+          onClearHighlight={() => setActiveHighlight(null)} 
+        />
 
         {/* 06. GEC Education Path Audit Timeline */}
         <EducationSection />

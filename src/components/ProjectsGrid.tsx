@@ -187,7 +187,49 @@ const getRepoTitle = (repo: any) => {
   }
 };
 
-export default function ProjectsGrid() {
+const isProjectRelevant = (project: any, highlight: { type: 'category' | 'skill'; value: string } | null) => {
+  if (!highlight) return true;
+  
+  const val = highlight.value.toLowerCase();
+  
+  if (highlight.type === 'skill') {
+    const targetTechs = val.split(/[\s/&,]+/).map(t => t.trim().toLowerCase()).filter(Boolean);
+    return project.tech.some((t: string) => {
+      const lowerT = t.toLowerCase();
+      return targetTechs.some(target => lowerT.includes(target) || target.includes(lowerT));
+    });
+  }
+  
+  if (highlight.type === 'category') {
+    if (val === 'languages') {
+      const languages = ['c++', 'javascript', 'typescript', 'java', 'sql', 'python', 'mysql', 'php', 'swing', 'oop', 'multi-threading', 'socket programming'];
+      return project.tech.some((t: string) => 
+        languages.some(lang => t.toLowerCase().includes(lang))
+      ) || (project.language && project.language.toLowerCase() !== 'unknown' && project.language.toLowerCase() !== 'html' && project.language.toLowerCase() !== 'css');
+    }
+    if (val === 'frameworks') {
+      const frameworks = ['react', 'framer motion', 'tailwind', 'node', 'express', 'next', 'three.js', 'webgl', 'chart.js', 'canvas'];
+      return project.tech.some((t: string) => 
+        frameworks.some(fw => t.toLowerCase().includes(fw))
+      );
+    }
+    if (val === 'devops') {
+      const devops = ['git', 'github', 'devops', 'ci/cd', 'actions', 'docker', 'kubernetes', 'aws', 'gcp'];
+      return project.tech.some((t: string) => 
+        devops.some(d => t.toLowerCase().includes(d))
+      ) || project.isFork === false;
+    }
+  }
+  
+  return false;
+};
+
+interface ProjectsGridProps {
+  activeHighlight?: { type: 'category' | 'skill'; value: string } | null;
+  onClearHighlight?: () => void;
+}
+
+export default function ProjectsGrid({ activeHighlight, onClearHighlight }: ProjectsGridProps) {
   const [activeFilter, setActiveFilter] = useState('All');
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -349,8 +391,20 @@ export default function ProjectsGrid() {
     return project.category === activeFilter;
   });
 
+  // Sort projects so that relevant ones come first when highlight is active
+  const sortedFilteredProjects = [...filteredProjects];
+  if (activeHighlight) {
+    sortedFilteredProjects.sort((a, b) => {
+      const aRel = isProjectRelevant(a, activeHighlight);
+      const bRel = isProjectRelevant(b, activeHighlight);
+      if (aRel && !bRel) return -1;
+      if (!aRel && bRel) return 1;
+      return 0;
+    });
+  }
+
   const [showAll, setShowAll] = useState(false);
-  const displayedProjects = showAll ? filteredProjects : filteredProjects.slice(0, 6);
+  const displayedProjects = showAll ? sortedFilteredProjects : sortedFilteredProjects.slice(0, 6);
 
   // Pick icons matching each project visually for SaaS look
   const getProjectIcon = (id: string) => {
@@ -440,117 +494,153 @@ export default function ProjectsGrid() {
           </div>
         ) : (
           /* Projects Grid */
-          <StaggerContainer 
-            key={`${activeFilter}-${showAll}`}
-            staggerDelay={showAll ? 0.015 : 0.08}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          >
-            {displayedProjects.map((project) => (
-              <StaggerItem key={project.id}>
-                <div 
-                  onClick={() => setSelectedProject(project)}
-                  className="group relative rounded-2xl border border-white/5 bg-zinc-950/60 p-6 sm:p-7 flex flex-col justify-between h-full transition-all duration-500 hover:-translate-y-1.5 hover:border-accent-gold/20 hover:bg-[#0b0b0f]/80 hover:shadow-2xl hover:shadow-accent-gold/[0.02] cursor-pointer"
-                >
-                  
-                  {/* Background soft hover glow */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-accent-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                  <div className="space-y-5">
-                    {/* Card Top Row: Custom Icon & Links */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.02] border border-white/10 group-hover:border-accent-gold/20 group-hover:bg-accent-gold/5 transition-all duration-500">
-                        {getProjectIcon(project.id)}
-                      </div>
-                      
-                      <div className="flex items-center gap-2.5">
-                        <a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5 transition-all relative z-10"
-                          title="View Repository"
-                        >
-                          <Github className="h-4.5 w-4.5" />
-                        </a>
-                        {project.liveUrl && (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-accent-gold border border-transparent hover:border-accent-gold/15 transition-all relative z-10"
-                            title="Launch Live Demo"
-                          >
-                            <ArrowUpRight className="h-4.5 w-4.5" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Title & Description */}
-                    <div className="space-y-2">
-                      <div className="flex items-center flex-wrap gap-2">
-                        <span className="font-mono text-[9px] uppercase tracking-wider text-accent-gold font-bold">
-                          {project.category}
-                        </span>
-                        {project.stars > 0 && (
-                          <>
-                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
-                            <span className="font-mono text-[9px] text-zinc-400 font-semibold bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Star className="h-2.5 w-2.5 text-accent-gold fill-accent-gold/25 animate-pulse" />
-                              <span>{project.stars} Stars</span>
-                            </span>
-                          </>
-                        )}
-                        {project.forks > 0 && (
-                          <>
-                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
-                            <span className="font-mono text-[9px] text-zinc-400 font-semibold bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <GitFork className="h-2.5 w-2.5 text-accent-indigo-light" />
-                              <span>{project.forks} Forks</span>
-                            </span>
-                          </>
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="font-display text-xl font-bold text-white group-hover:text-accent-gold transition-colors duration-500">
-                          {project.title}
-                        </h3>
-                        <a 
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 hover:text-accent-gold transition-colors pb-1 relative z-10"
-                          title="View Repository on GitHub"
-                        >
-                          <Github className="h-3.5 w-3.5" />
-                          <span>Niketraj08/{project.id}</span>
-                        </a>
-                      </div>
-                      <p className="font-sans text-sm text-zinc-400 leading-relaxed font-light">
-                        {project.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Tech Badges Footer */}
-                  <div className="mt-8 pt-5 border-t border-white/5 flex flex-wrap gap-1.5">
-                    {project.tech.map((t: string, idx: number) => (
-                      <span
-                        key={idx}
-                        className="font-mono text-[10px] text-zinc-400 font-semibold px-2.5 py-1 rounded-md bg-white/[0.01] border border-white/5 group-hover:border-accent-indigo/20 transition-colors duration-500"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-
+          <div className="space-y-6">
+            {activeHighlight && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-accent-gold/[0.03] border border-accent-gold/15 px-4.5 py-3 rounded-xl font-mono text-xs text-accent-gold animate-fade-in shadow-sm">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-accent-gold animate-spin-slow" />
+                  <span>
+                    Focusing on projects matching {activeHighlight.type === 'category' ? 'category' : 'skill'}: <strong className="text-white uppercase tracking-wider">{activeHighlight.value}</strong>
+                  </span>
                 </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+                <button
+                  onClick={onClearHighlight}
+                  className="w-full sm:w-auto text-center hover:text-white bg-accent-gold/10 hover:bg-accent-gold/20 transition-all rounded-lg px-3 py-1.5 text-[10px] uppercase font-bold shrink-0 cursor-pointer"
+                >
+                  Show All Projects / Reset Filter
+                </button>
+              </div>
+            )}
+
+            <StaggerContainer 
+              key={`${activeFilter}-${showAll}-${activeHighlight ? activeHighlight.value : 'none'}`}
+              staggerDelay={showAll ? 0.015 : 0.08}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              {displayedProjects.map((project) => {
+                const isRelevant = !activeHighlight || isProjectRelevant(project, activeHighlight);
+                const isDimmed = !!activeHighlight && !isRelevant;
+
+                return (
+                  <StaggerItem key={project.id}>
+                    <div 
+                      onClick={() => setSelectedProject(project)}
+                      className={`group relative rounded-2xl border bg-zinc-950/60 p-6 sm:p-7 flex flex-col justify-between h-full transition-all duration-500 hover:-translate-y-1.5 hover:bg-[#0b0b0f]/80 hover:shadow-2xl hover:shadow-accent-gold/[0.02] cursor-pointer ${
+                        isDimmed 
+                          ? 'opacity-25 saturate-50 scale-[0.98] blur-[0.2px] pointer-events-none' 
+                          : activeHighlight 
+                            ? 'border-accent-gold/45 shadow-[0_0_20px_rgba(223,186,115,0.12)] scale-[1.01]' 
+                            : 'border-white/5 hover:border-accent-gold/20'
+                      }`}
+                    >
+                      
+                      {/* Background soft hover glow */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-accent-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                      <div className="space-y-5">
+                        {/* Card Top Row: Custom Icon & Links */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.02] border border-white/10 group-hover:border-accent-gold/20 group-hover:bg-accent-gold/5 transition-all duration-500">
+                            {getProjectIcon(project.id)}
+                          </div>
+                          
+                          <div className="flex items-center gap-2.5">
+                            <a
+                              href={project.githubUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/5 transition-all relative z-10"
+                              title="View Repository"
+                            >
+                              <Github className="h-4.5 w-4.5" />
+                            </a>
+                            {project.liveUrl && (
+                              <a
+                                href={project.liveUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-accent-gold border border-transparent hover:border-accent-gold/15 transition-all relative z-10"
+                                title="Launch Live Demo"
+                              >
+                                <ArrowUpRight className="h-4.5 w-4.5" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Title & Description */}
+                        <div className="space-y-2">
+                          <div className="flex items-center flex-wrap gap-2">
+                            <span className="font-mono text-[9px] uppercase tracking-wider text-accent-gold font-bold">
+                              {project.category}
+                            </span>
+                            {activeHighlight && isRelevant && (
+                              <span className="font-mono text-[9px] uppercase tracking-wider text-accent-gold font-bold bg-accent-gold/10 border border-accent-gold/20 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 animate-pulse">
+                                <Sparkles className="h-2.5 w-2.5" />
+                                <span>Match</span>
+                              </span>
+                            )}
+                            {project.stars > 0 && (
+                              <>
+                                <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
+                                <span className="font-mono text-[9px] text-zinc-400 font-semibold bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                  <Star className="h-2.5 w-2.5 text-accent-gold fill-accent-gold/25 animate-pulse" />
+                                  <span>{project.stars} Stars</span>
+                                </span>
+                              </>
+                            )}
+                            {project.forks > 0 && (
+                              <>
+                                <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
+                                <span className="font-mono text-[9px] text-zinc-400 font-semibold bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                  <GitFork className="h-2.5 w-2.5 text-accent-indigo-light" />
+                                  <span>{project.forks} Forks</span>
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <h3 className="font-display text-xl font-bold text-white group-hover:text-accent-gold transition-colors duration-500">
+                              {project.title}
+                            </h3>
+                            <a 
+                              href={project.githubUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 hover:text-accent-gold transition-colors pb-1 relative z-10"
+                              title="View Repository on GitHub"
+                            >
+                              <Github className="h-3.5 w-3.5" />
+                              <span>Niketraj08/{project.id}</span>
+                            </a>
+                          </div>
+                          <p className="font-sans text-sm text-zinc-400 leading-relaxed font-light">
+                            {project.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tech Badges Footer */}
+                      <div className="mt-8 pt-5 border-t border-white/5 flex flex-wrap gap-1.5">
+                        {project.tech.map((t: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="font-mono text-[10px] text-zinc-400 font-semibold px-2.5 py-1 rounded-md bg-white/[0.01] border border-white/5 group-hover:border-accent-indigo/20 transition-colors duration-500"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                    </div>
+                  </StaggerItem>
+                );
+              })}
+            </StaggerContainer>
+          </div>
         )}
 
         {/* Toggle show all projects */}

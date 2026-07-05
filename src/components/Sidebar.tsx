@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Terminal, 
   User, 
-  BarChart3, 
   Cpu, 
   FolderGit2, 
   GraduationCap, 
   Mail, 
   Menu, 
   X,
-  Clock,
   Code2
 } from 'lucide-react';
 
@@ -19,18 +17,6 @@ interface SidebarProps {
 
 export default function Sidebar({ activeSection }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [time, setTime] = useState('');
-
-  // Live dynamic local time counter for the "SaaS Admin Dashboard" aesthetic
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTime(now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const menuItems = [
     { id: 'hero', label: 'Terminal / Home', icon: Terminal },
@@ -115,9 +101,6 @@ export default function Sidebar({ activeSection }: SidebarProps) {
 
           {/* Navigation Menu */}
           <nav className="space-y-1.5">
-            <span className="px-3 font-mono text-[10px] font-semibold uppercase tracking-wider text-zinc-500 block mb-3">
-              Core Modules
-            </span>
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
@@ -142,27 +125,6 @@ export default function Sidebar({ activeSection }: SidebarProps) {
               );
             })}
           </nav>
-        </div>
-
-        {/* Footer info: Local Live Time (dashboard metric look) */}
-        <div className="border-t border-white/5 pt-4 space-y-3">
-          <div className="flex items-center justify-between px-2 font-mono text-[11px] text-zinc-500">
-            <span className="flex items-center gap-1.5">
-              <Clock className="h-3 w-3 text-accent-indigo" /> Time (UTC)
-            </span>
-            <span className="text-zinc-300 tracking-wider font-semibold">{time || '00:00'}</span>
-          </div>
-          
-          <div className="rounded-lg bg-white/[0.01] border border-white/5 p-3 flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <div className="text-[10px] font-mono leading-tight">
-              <p className="text-zinc-300 font-medium">Node Container</p>
-              <p className="text-zinc-500 text-[9px]">GEC-SECURED-API</p>
-            </div>
-          </div>
         </div>
       </aside>
     </>

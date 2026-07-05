@@ -257,7 +257,30 @@ const renderCustomSkillIcon = (name: string) => {
   return <Code2 className="h-3.5 w-3.5 text-zinc-500" />;
 };
 
-export default function SkillsSection() {
+interface SkillsSectionProps {
+  activeHighlight?: { type: 'category' | 'skill'; value: string } | null;
+  onHighlightChange?: (highlight: { type: 'category' | 'skill'; value: string } | null) => void;
+}
+
+export default function SkillsSection({ activeHighlight, onHighlightChange }: SkillsSectionProps) {
+  const handleCategoryClick = (categoryId: string) => {
+    if (!onHighlightChange) return;
+    if (activeHighlight?.type === 'category' && activeHighlight.value === categoryId) {
+      onHighlightChange(null);
+    } else {
+      onHighlightChange({ type: 'category', value: categoryId });
+    }
+  };
+
+  const handleSkillClick = (skillName: string) => {
+    if (!onHighlightChange) return;
+    if (activeHighlight?.type === 'skill' && activeHighlight.value === skillName) {
+      onHighlightChange(null);
+    } else {
+      onHighlightChange({ type: 'skill', value: skillName });
+    }
+  };
+
   return (
     <section id="skills" className="py-20 border-t border-white/5 relative">
       {/* Dynamic Background Glows */}
@@ -266,84 +289,149 @@ export default function SkillsSection() {
       <div className="space-y-12">
         {/* Section Heading */}
         <ScrollReveal>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent-gold" />
-              <span className="font-mono text-xs uppercase tracking-widest text-accent-gold font-bold">Skills_Module_02</span>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-gold" />
+                <span className="font-mono text-xs uppercase tracking-widest text-accent-gold font-bold">Skills_Module_02</span>
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-white tracking-tight">
+                Categorized Core Competencies
+              </h2>
+              <p className="font-sans text-sm text-zinc-500 max-w-xl">
+                Hover over cards for real-time 3D depth tilt. <span className="text-accent-gold font-medium">Click any category header or skill row</span> to dynamically highlight matching repositories in the projects dashboard below.
+              </p>
             </div>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-white tracking-tight">
-              Categorized Core Competencies
-            </h2>
-            <p className="font-sans text-sm text-zinc-500 max-w-xl">
-              Hover over cards for real-time 3D depth tilt. Performance indexes are assessed on academic and project implementations.
-            </p>
+
+            {/* Live Filter Indicator HUD */}
+            {activeHighlight && (
+              <div className="flex items-center gap-3 bg-accent-gold/[0.03] border border-accent-gold/15 px-4 py-2.5 rounded-xl w-fit animate-fade-in font-mono text-xs text-accent-gold">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-gold opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-gold"></span>
+                </span>
+                <span>
+                  Filtering dashboard by {activeHighlight.type === 'category' ? 'category' : 'skill'}: <strong className="text-white uppercase tracking-wider">{activeHighlight.value}</strong>
+                </span>
+                <button
+                  onClick={() => onHighlightChange?.(null)}
+                  className="ml-3 hover:text-white bg-accent-gold/10 hover:bg-accent-gold/20 transition-all rounded px-2 py-0.5 text-[9px] uppercase font-bold"
+                >
+                  Clear Filter
+                </button>
+              </div>
+            )}
           </div>
         </ScrollReveal>
 
         {/* Categories Grid */}
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {SKILL_CATEGORIES.map((category) => (
-            <StaggerItem key={category.id}>
-              <TiltCard maxTilt={6} className="h-full">
-                <div className="glass-panel p-6 sm:p-7 rounded-2xl border border-white/5 bg-[#0b0b0f]/80 flex flex-col justify-between h-full relative group overflow-hidden">
-                  {/* Dynamic hovering corner accent */}
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-accent-indigo/10 to-transparent opacity-50 group-hover:from-accent-gold/15 transition-all duration-300 pointer-events-none" />
+          {SKILL_CATEGORIES.map((category) => {
+            const isCategoryActive = activeHighlight?.type === 'category' && activeHighlight.value === category.id;
+            const isAnyActive = !!activeHighlight;
+            const isCardDimmed = isAnyActive && !isCategoryActive && !category.skills.some(s => activeHighlight.type === 'skill' && activeHighlight.value === s.name);
 
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 rounded-xl bg-white/[0.02] border border-white/10 text-accent-gold group-hover:border-accent-gold/25 transition-colors duration-300">
-                        {category.id === 'languages' ? <Code2 className="h-5 w-5" /> : category.id === 'frameworks' ? <Layers className="h-5 w-5" /> : <Server className="h-5 w-5" />}
+            return (
+              <StaggerItem key={category.id}>
+                <TiltCard maxTilt={6} className={`h-full transition-all duration-500 ${isCardDimmed ? 'opacity-35 saturate-50' : 'opacity-100'}`}>
+                  <div className={`glass-panel p-6 sm:p-7 rounded-2xl border bg-[#0b0b0f]/80 flex flex-col justify-between h-full relative group overflow-hidden transition-all duration-500 ${
+                    isCategoryActive 
+                      ? 'border-accent-gold shadow-[0_0_20px_rgba(223,186,115,0.12)] bg-[#0d0d14]/90' 
+                      : 'border-white/5 hover:border-white/10'
+                  }`}>
+                    {/* Dynamic hovering corner accent */}
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-accent-indigo/10 to-transparent opacity-50 group-hover:from-accent-gold/15 transition-all duration-300 pointer-events-none" />
+
+                    <div>
+                      {/* Header */}
+                      <div 
+                        onClick={() => handleCategoryClick(category.id)}
+                        className="flex items-center gap-3 mb-4 cursor-pointer select-none group/hdr"
+                      >
+                        <div className={`p-2 rounded-xl bg-white/[0.02] border transition-all duration-300 ${
+                          isCategoryActive 
+                            ? 'border-accent-gold text-accent-gold bg-accent-gold/5' 
+                            : 'border-white/10 text-accent-gold group-hover/hdr:border-accent-gold/25'
+                        }`}>
+                          {category.id === 'languages' ? <Code2 className="h-5 w-5" /> : category.id === 'frameworks' ? <Layers className="h-5 w-5" /> : <Server className="h-5 w-5" />}
+                        </div>
+                        <div>
+                          <h3 className={`font-display text-lg font-bold transition-all duration-300 ${
+                            isCategoryActive ? 'text-accent-gold' : 'text-white group-hover/hdr:text-accent-gold'
+                          }`}>
+                            {category.title}
+                          </h3>
+                          <p className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 font-bold flex items-center gap-1.5">
+                            <span>Class {category.id}</span>
+                            {isCategoryActive && (
+                              <span className="h-1.5 w-1.5 rounded-full bg-accent-gold animate-pulse" />
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-display text-lg font-bold text-white group-hover:text-accent-gold transition-colors duration-300">
-                          {category.title}
-                        </h3>
-                        <p className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 font-bold">Class {category.id}</p>
+
+                      <p className="font-sans text-xs text-zinc-400 mb-6 leading-relaxed">
+                        {category.description}
+                      </p>
+
+                      {/* Skill List */}
+                      <div className="space-y-3.5">
+                        {category.skills.map((skill, sIdx) => {
+                          const isSkillActive = activeHighlight?.type === 'skill' && activeHighlight.value === skill.name;
+
+                          return (
+                            <div 
+                              key={sIdx} 
+                              onClick={() => handleSkillClick(skill.name)}
+                              className={`space-y-1.5 group/skill cursor-pointer p-2 -mx-2 rounded-xl transition-all duration-300 select-none ${
+                                isSkillActive 
+                                  ? 'bg-accent-gold/5 border border-accent-gold/15' 
+                                  : 'hover:bg-white/[0.02] border border-transparent'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between text-xs font-mono">
+                                <span className={`flex items-center gap-2 transition-colors ${
+                                  isSkillActive ? 'text-accent-gold font-semibold' : 'text-zinc-300 group-hover/skill:text-white'
+                                }`}>
+                                  {renderCustomSkillIcon(skill.name)}
+                                  {skill.name}
+                                </span>
+                                <span className={isSkillActive ? 'text-accent-gold font-semibold' : 'text-zinc-500 font-medium'}>
+                                  {skill.level}%
+                                </span>
+                              </div>
+                              
+                              {/* Premium Progress Bar */}
+                              <div className={`h-1.5 w-full rounded-full overflow-hidden border transition-all duration-300 ${
+                                isSkillActive ? 'bg-accent-gold/10 border-accent-gold/20' : 'bg-white/[0.02] border-white/5'
+                              }`}>
+                                <div 
+                                  className={`h-full rounded-full bg-gradient-to-r transition-all duration-1000 ease-out ${
+                                    isSkillActive 
+                                      ? 'from-accent-gold via-accent-gold to-white shadow-[0_0_8px_rgba(223,186,115,0.4)]' 
+                                      : 'from-accent-indigo-dark via-accent-indigo to-accent-gold'
+                                  }`}
+                                  style={{ width: `${skill.level}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    <p className="font-sans text-xs text-zinc-400 mb-6 leading-relaxed">
-                      {category.description}
-                    </p>
-
-                    {/* Skill List */}
-                    <div className="space-y-4.5">
-                      {category.skills.map((skill, sIdx) => {
-                        return (
-                          <div key={sIdx} className="space-y-1.5 group/skill">
-                            <div className="flex items-center justify-between text-xs font-mono">
-                              <span className="flex items-center gap-2 text-zinc-300 group-hover/skill:text-white transition-colors">
-                                {renderCustomSkillIcon(skill.name)}
-                                {skill.name}
-                              </span>
-                              <span className="text-zinc-500 font-medium">{skill.level}%</span>
-                            </div>
-                            
-                            {/* Premium Progress Bar */}
-                            <div className="h-1.5 w-full bg-white/[0.02] rounded-full overflow-hidden border border-white/5">
-                              <div 
-                                className="h-full rounded-full bg-gradient-to-r from-accent-indigo-dark via-accent-indigo to-accent-gold transition-all duration-1000 ease-out"
-                                style={{ width: `${skill.level}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
+                    {/* Visual metadata footer on SaaS dashboard */}
+                    <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between font-mono text-[9px] text-zinc-600">
+                      <span>SECURITY: VERIFIED</span>
+                      <span className="flex items-center gap-0.5 group-hover:text-accent-gold transition-colors">
+                        INDEXED <ChevronRight className="h-2 w-2" />
+                      </span>
                     </div>
                   </div>
-
-                  {/* Visual metadata footer on SaaS dashboard */}
-                  <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between font-mono text-[9px] text-zinc-600">
-                    <span>SECURITY: VERIFIED</span>
-                    <span className="flex items-center gap-0.5 group-hover:text-accent-gold transition-colors">
-                      INDEXED <ChevronRight className="h-2 w-2" />
-                    </span>
-                  </div>
-                </div>
-              </TiltCard>
-            </StaggerItem>
-          ))}
+                </TiltCard>
+              </StaggerItem>
+            );
+          })}
         </StaggerContainer>
       </div>
     </section>

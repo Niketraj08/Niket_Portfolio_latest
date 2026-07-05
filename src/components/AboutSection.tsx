@@ -44,7 +44,7 @@ export default function AboutSection() {
                 <div className="mt-6 pt-6 border-t border-white/5 grid grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-mono text-[10px] uppercase text-zinc-500 font-bold">Primary Focus</h4>
-                    <p className="font-sans text-xs text-zinc-300 font-medium mt-1">Full-Stack SaaS Architectures</p>
+                    <p className="font-sans text-xs text-zinc-300 font-medium mt-1">Full-Stack Developer</p>
                   </div>
                   <div>
                     <h4 className="font-mono text-[10px] uppercase text-zinc-500 font-bold">Secondary Focus</h4>
